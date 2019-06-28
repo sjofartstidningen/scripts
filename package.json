@@ -1,6 +1,6 @@
 {
   "name": "@sjofartstidningen/scripts",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "description": "A set of useful scripts used around the project",
   "main": "dist/index.js",
   "repository": "https://github.com/sjofartstidningen/scripts",
@@ -11,7 +11,7 @@
   "license": "MIT",
   "private": false,
   "bin": {
-    "sst": "./bin.js"
+    "sst-scripts": "./bin.js"
   },
   "files": [
     "dist",
@@ -20,7 +20,8 @@
   "scripts": {
     "start": "parcel watch src/index.js --target node",
     "build": "parcel build src/index.js --target node",
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "jest",
+    "semantic-release": "semantic-release"
   },
   "dependencies": {
     "execa": "^1.0.0",
@@ -36,9 +37,41 @@
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
-    "parcel-bundler": "^1.12.3"
+    "cz-conventional-changelog": "^2.1.0",
+    "husky": "^2.7.0",
+    "jest": "^24.8.0",
+    "jest-dom": "^3.5.0",
+    "lint-staged": "^8.2.1",
+    "parcel-bundler": "^1.12.3",
+    "prettier": "^1.18.2",
+    "react-testing-library": "^8.0.1",
+    "semantic-release": "^15.13.18"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "concurrent": false,
+    "linters": {
+      "*.{js,ts,jsx,tsx,json,md,yml,html}": [
+        "prettier --write",
+        "git add"
+      ]
+    }
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "proseWrap": "always"
   }
 }
