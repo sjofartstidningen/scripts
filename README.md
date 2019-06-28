@@ -108,3 +108,35 @@ add_action('wp_enqueue_scripts', function () {
   }
 });
 ```
+
+### `sst-scripts make-aliases`
+
+Generate parcel aliases based on the wordpress-packages that exists in your
+project.
+
+With `parcel-bundler` you can use an `alias`-prop in package.json to alias
+certain packages to local files instead of searching for them in `node_modules`.
+This is useful when working with `@wordpress/{package}`'s since they are
+generally available under `window.wp.{package}`.
+
+This command will look thru your dependecies and output alias files to
+`src/alias/wordpress-{package}.js`. In it there will only be a singe export
+pointing to `window.wp.{package}`.
+
+And during development you can just import the scripts using standard es
+modules:
+
+```js
+import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+```
+
+_Just make sure that you've also installed the package as a dependecy._
+
+#### Usage
+
+```shell
+$ sst-scripts make-aliases
+```
+
+_Preferably this should run after new installs (e.g as postinstall script)._
