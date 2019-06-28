@@ -1,0 +1,35 @@
+import path from 'path';
+import os from 'os';
+import readPkg from 'read-pkg-up';
+import execa from 'execa';
+
+async function getData(normalizePackage = true) {
+  const pkg = await readPkg({ normalize: normalizePackage });
+  const rootDir = path.dirname(pkg.path);
+
+  const { stdout: gitRoot } = await execa('git', [
+    'rev-parse',
+    '--show-toplevel',
+  ]);
+
+  const project = await readPkg({
+    normalize: normalizePackage,
+    cwd: path.join(gitRoot, 'site'),
+  });
+
+  return {
+    package: pkg.package,
+    projectPackage: project.package,
+    paths: {
+      root: rootDir,
+      src: path.join(rootDir, 'src'),
+      dist: path.join(rootDir, 'dist'),
+      languages: path.join(rootDir, 'languages'),
+      temp: os.tmpdir(),
+      projectRoot: path.dirname(project.path),
+      gitRoot,
+    },
+  };
+}
+
+export { getData };

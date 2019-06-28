@@ -1,0 +1,44 @@
+{
+  "name": "@sjofartstidningen/scripts",
+  "version": "0.0.0",
+  "description": "A set of useful scripts used around the project",
+  "main": "dist/index.js",
+  "repository": "https://github.com/sjofartstidningen/scripts",
+  "author": "Sjöfartstidningen <info@sjofartstidningen.se>",
+  "contributors": [
+    "Adam Bergman <adam@fransvilhelm.com>"
+  ],
+  "license": "MIT",
+  "private": false,
+  "bin": {
+    "sst": "./bin.js"
+  },
+  "files": [
+    "dist",
+    "bin.js"
+  ],
+  "scripts": {
+    "start": "parcel watch src/index.js --target node",
+    "build": "parcel build src/index.js --target node",
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "dependencies": {
+    "execa": "^1.0.0",
+    "fs-extra": "^8.0.1",
+    "inquirer": "^6.3.1",
+    "lodash": "^4.17.11",
+    "madge": "^3.4.4",
+    "md5": "^2.2.1",
+    "read-pkg-up": "^6.0.0",
+    "replace-in-file": "^4.1.0",
+    "yargs": "^13.2.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "parcel-bundler": "^1.12.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
