@@ -35,10 +35,7 @@ async function makePot() {
       'i18n',
       'make-pot',
       '.',
-      path.join(
-        paths.dist,
-        `${pkg.name.replace('@sjofartstidningen/', '')}.pot`,
-      ),
+      path.join(paths.dist, `${pkg.name.replace(/^(@\w+\/)/, '')}.pot`),
       '--exclude=dist',
     ]);
   } catch (error) {
