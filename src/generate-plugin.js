@@ -64,6 +64,10 @@ async function generatePlugin() {
       content: templates.jsEntry(templateData),
     },
     {
+      name: `src/assets.urls`,
+      content: templates.jsEntry(templateData),
+    },
+    {
       name: 'index.php',
       content: templates.index(templateData),
     },

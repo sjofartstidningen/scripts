@@ -12,11 +12,11 @@ const packageJson = _.template(
   "license": "<%= package.license %>",
   "private": true,
   "scripts": {
-    "start": "parcel serve src/<%= _.kebabCase(pluginName) %>.js --hmr-hostname localhost --public-url .",
-    "build": "parcel build src/<%= _.kebabCase(pluginName) %>.js --public-url .",
-    "postbuild": "sst make-json",
-    "postinstall": "sst make-aliases",
-    "i18n:generate": "sst make-pot"
+    "start": "parcel serve src/assets.urls --hmr-hostname localhost --public-url .",
+    "build": "parcel build src/assets.urls --public-url .",
+    "prestart": "sst-scripts make-aliases",
+    "prebuild": "sst-scripts make-aliases",
+    "postbuild": "sst-scripts make-pot && sst-scripts make-json"
   },
   "dependencies": {},
   "devDependencies": {
@@ -25,12 +25,10 @@ const packageJson = _.template(
     "@babel/preset-react": "^7.0.0",
     "@sjofartstidningen/scripts": "^1.0.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-    "parcel-bundler": "^1.12.3"
+    "parcel-bundler": "^1.12.3",
+    "parcel-plugin-assets-list": "^1.7.1"
   },
-  "alias": {},
-  "wp": {
-    "entrypoints": ["src/<%= _.kebabCase(pluginName) %>.js"]
-  }
+  "alias": {}
 }
 `,
 );
@@ -85,6 +83,10 @@ define('<%= _.toUpper(_.snakeCase(pluginName)) %>_PATH', \\plugin_dir_path(__FIL
 );
 
 const jsEntry = _.template("console.log('<%= _.capitalize(pluginName) %>')");
+
+const assetsEntry = _.template(
+  '<%= _.kebabCase(pluginName) %>.js: ./<%= _.kebabCase(pluginName) %>.js\n',
+);
 
 const index = _.template('<?php // Silence is golden\n');
 
