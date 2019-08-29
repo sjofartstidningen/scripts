@@ -14,6 +14,7 @@ async function getData(normalizePackage = true) {
       src: path.join(rootDir, 'src'),
       dist: path.join(rootDir, 'dist'),
       languages: path.join(rootDir, 'languages'),
+      views: path.join(rootDir, 'views'),
       temp: os.tmpdir(),
     },
   };
