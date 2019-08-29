@@ -50,11 +50,27 @@ async function makeAliases() {
       });
     }
 
+    if (Object.keys(pkg.dependencies).indexOf('react-dom') > -1) {
+      dependencies.push({
+        name: 'react-dom',
+        filename: 'react-dom.js',
+        content: template({ moduleExport: `window.ReactDOM` }),
+      });
+    }
+
     if (Object.keys(pkg.dependencies).indexOf('lodash') > -1) {
       dependencies.push({
         name: 'lodash',
         filename: 'lodash.js',
         content: template({ moduleExport: `window.lodash` }),
+      });
+    }
+
+    if (Object.keys(pkg.dependencies).indexOf('jquery') > -1) {
+      dependencies.push({
+        name: 'jquery',
+        filename: 'jquery.js',
+        content: template({ moduleExport: `window.jQuery` }),
       });
     }
 
