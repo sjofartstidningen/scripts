@@ -2,12 +2,14 @@
  * Generate WordPress compatible translations for each javascript entrypoint in
  * your project.
  *
- * The script will generate translations for each entrypoint defined in
- * `package.json` under `wp.entrypoints`.
+ * The command requires that you use `parcel-bundler` together with the
+ * `parcel-plugin-assets-list`-plugin. The plugin will generate a file called
+ * `assets.json` in your dist-folder. From this we can connect generated
+ * translations with the generated dist-files.
  *
  * The script expects the following structure:
  * - `/languages` Directory containing translation files
- * - `/src` Directory containing src files, and entrypoints specified in package.json
+ * - `/src` Directory containing src files, and entrypoints specified in `src/assets.urls`
  * - `/dist` Directory containing built files with at least one file per entrypoint
  *
  * To utilize the translations in your plugin use the following:
@@ -17,26 +19,18 @@
  * ```
  */
 import path from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
+import fs from 'fs-extra';
 import execa from 'execa';
 import madge from 'madge';
 import _ from 'lodash';
 import md5 from 'md5';
 import { getData } from './data';
 
-const readdir = promisify(fs.readdir);
-const mkdir = promisify(fs.mkdir);
-const readFile = promisify(fs.readFile);
-const writeFile = promisify(fs.writeFile);
-
 async function makeJson() {
   try {
     const { paths } = await getData();
 
-    await Promise.all(
-      Object.values(paths).map(p => mkdir(p, { recursive: true })),
-    );
+    await Promise.all(Object.values(paths).map(p => fs.ensureDir(p)));
 
     const domain = await extractDomain(paths.dist);
     const originalTranslations = await getOriginalTranslations(
@@ -75,7 +69,7 @@ async function makeJson() {
  * @returns {Promise<string>}
  */
 async function extractDomain(distDir) {
-  const files = await readdir(distDir);
+  const files = await fs.readdir(distDir);
   const translationFiles = files.filter(
     file => path.extname(file) === '.pot' || path.extname(file) === '.po',
   );
@@ -88,7 +82,7 @@ async function extractDomain(distDir) {
 
   for (let i = 0; i < translationFiles.length; i++) {
     const file = translationFiles[i];
-    const content = await readFile(path.join(distDir, file), 'utf-8');
+    const content = await fs.readFile(path.join(distDir, file), 'utf-8');
     const [, domain] = content.match(/"x-domain: (\S+)\\n"/i);
 
     if (domain) return domain;
@@ -117,13 +111,13 @@ async function getOriginalTranslations(langDir, tempDir) {
    * strings from the po-files in the lanugages dir
    */
   await execa('wp', ['i18n', 'make-json', langDir, tempDir, '--no-purge']);
-  const files = (await readdir(tempDir)).filter(
+  const files = (await fs.readdir(tempDir)).filter(
     file => path.extname(file) === '.json',
   );
 
   const translations = await Promise.all(
     files.map(async file =>
-      JSON.parse(await readFile(path.join(tempDir, file))),
+      JSON.parse(await fs.readFile(path.join(tempDir, file))),
     ),
   );
 
@@ -182,9 +176,7 @@ async function generateTranslations(
      * A manifest may contain other entrypoints then js files. But we're only
      * concerned by js-entrypoints
      */
-    if (path.extname(key) !== '.js') {
-      continue;
-    }
+    if (path.extname(key) !== '.js') continue;
 
     const srcFile = path.join(paths.src, key);
     const distFile = path.join(paths.dist, manifest[key]);
@@ -198,10 +190,16 @@ async function generateTranslations(
       return dependecies.includes(path.join(paths.root, translation.source));
     });
 
+    /**
+     * If no related translations are found we will skip this entrypint and
+     * continue with the rest.
+     */
+    if (relatedTranslations.length < 1) continue;
+
     const mergedTranslations = _.merge(...relatedTranslations);
     const originalDomain = mergedTranslations.domain;
 
-    if (originalDomain !== domain) {
+    if (originalDomain && originalDomain !== domain) {
       mergedTranslations.locale_data[domain] =
         mergedTranslations.locale_data[originalDomain];
       delete mergedTranslations.locale_data[originalDomain];
@@ -222,7 +220,7 @@ async function generateTranslations(
     );
 
     promises.push(
-      writeFile(
+      fs.writeFile(
         translationFileName,
         JSON.stringify(mergedTranslations),
         'utf-8',
@@ -235,7 +233,7 @@ async function generateTranslations(
 
 const getAssetsManifest = async distPath => {
   try {
-    const content = await readFile(path.join(distPath, 'assets.json'));
+    const content = await fs.readFile(path.join(distPath, 'assets.json'));
     return JSON.parse(content);
   } catch (error) {
     throw new Error(
